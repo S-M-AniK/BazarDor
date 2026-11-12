@@ -2,7 +2,7 @@
 
 A Bangla-first grocery price tracker where daily prices, price changes and market comparisons live in one place. Prices are shown in Bangla numerals with familiar local units, so people can check market rates before leaving home.
 
-**Live demo:** _add your Vercel link here_
+**Live demo:** https://bazardor-bd-delta.vercel.app
 
 ## The problem
 
