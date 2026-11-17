@@ -4,6 +4,7 @@ import { getProducts } from "@/lib/products";
 import { getSession } from "@/lib/session";
 import { toBnNumber } from "@/lib/format";
 import { updatePrice, bulkUpdatePrices } from "./actions";
+import AddProductForm from "@/components/AddProductForm";
 
 const csvErrors = {
   file: "সঠিক CSV ফাইল দিন (সর্বোচ্চ ২০০ KB)",
@@ -15,7 +16,7 @@ export default async function AdminPage({ searchParams }) {
   if (!session) redirect("/login");
   if (session.user.email !== process.env.ADMIN_EMAIL) redirect("/");
 
-  const { ok, error, csv, updated, skipped } = await searchParams;
+  const { ok, error, csv, updated, skipped, added, add } = await searchParams;
   const products = await getProducts();
 
   return (
@@ -100,6 +101,7 @@ export default async function AdminPage({ searchParams }) {
             </button>
           </form>
         </div>
+                <AddProductForm added={added} error={add} />
       </main>
     </>
   );
