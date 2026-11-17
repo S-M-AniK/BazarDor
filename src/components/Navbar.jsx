@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { bnDate } from "@/lib/format";
 import { getSession } from "@/lib/session";
+import { getT } from "@/lib/i18n";
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
+import LangToggle from "./LangToggle";
 
 export default async function Navbar() {
-  const session = await getSession();
+  const [session, { lang, t }] = await Promise.all([getSession(), getT()]);
   const user = session?.user;
 
   return (
@@ -14,27 +16,32 @@ export default async function Navbar() {
         <Link href="/" className="flex items-center gap-3">
           <span className="w-10 h-10 rounded-xl bg-brand text-white grid place-items-center text-xl">🛒</span>
           <span className="leading-tight">
-            <span className="block font-bold">বাজার দর</span>
-            <span className="block text-xs text-gray-500">{bnDate()}</span>
+            <span className="block font-bold">{t("siteName")}</span>
+            <span className="block text-xs text-gray-500">{bnDate(lang)}</span>
           </span>
         </Link>
         <div className="flex items-center gap-4">
-                      <ThemeToggle />
+          <ThemeToggle />
+          <LangToggle lang={lang} />
           {user ? (
             <>
-              <Link href="/products" className="font-semibold text-sm">পণ্য</Link>
-                            {user.email === process.env.ADMIN_EMAIL && (
-                <Link href="/admin" className="font-semibold text-sm text-brand">দাম আপডেট</Link>
+              <Link href="/products" className="font-semibold text-sm">{t("products")}</Link>
+              {user.email === process.env.ADMIN_EMAIL && (
+                <Link href="/admin" className="font-semibold text-sm text-brand">{t("priceUpdate")}</Link>
               )}
-              <Link href="/favourites" className="font-semibold text-sm">♥ পছন্দ</Link>
+              <Link href="/favourites" className="font-semibold text-sm">♥ {t("favourites")}</Link>
               <Link href="/profile" className="font-semibold text-sm">{user.name}</Link>
-              <LogoutButton className="bg-brand text-white text-sm font-semibold px-5 py-2 rounded-full" />
+              <LogoutButton
+                label={t("signOut")}
+                message={t("signedOut")}
+                className="bg-brand text-white text-sm font-semibold px-5 py-2 rounded-full"
+              />
             </>
           ) : (
             <>
-              <Link href="/login" className="font-semibold text-sm">সাইন ইন</Link>
+              <Link href="/login" className="font-semibold text-sm">{t("signIn")}</Link>
               <Link href="/register" className="bg-brand text-white text-sm font-semibold px-5 py-2 rounded-full">
-                সাইন আপ
+                {t("signUp")}
               </Link>
             </>
           )}

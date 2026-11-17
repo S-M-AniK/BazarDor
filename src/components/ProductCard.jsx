@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { changePct, toBnNumber } from "@/lib/format";
+import { productName, unitFull } from "@/data/translations";
+import { getT } from "@/lib/i18n";
 import FavouriteButton from "./FavouriteButton";
 
-export default function ProductCard({ product, favourite = false }) {
+export default async function ProductCard({ product, favourite = false }) {
+  const { lang, t } = await getT();
   const pct = changePct(product);
   const badge =
     pct > 0
@@ -20,17 +23,17 @@ export default function ProductCard({ product, favourite = false }) {
         <div className="flex items-center gap-3 pr-10">
           <span className="w-11 h-11 rounded-xl bg-gray-50 grid place-items-center text-2xl">{product.icon}</span>
           <div className="leading-tight">
-            <p className="font-semibold">{product.name}</p>
-            <p className="text-sm text-gray-500">{product.unit}</p>
+            <p className="font-semibold">{productName(product, lang)}</p>
+            <p className="text-sm text-gray-500">{unitFull(product.unit, lang)}</p>
           </div>
         </div>
-        <p className="mt-4 text-sm text-gray-500">আজকের দাম</p>
+        <p className="mt-4 text-sm text-gray-500">{t("todayPrice")}</p>
         <div className="flex items-center justify-between">
           <p>
-            <span className="font-bold">{toBnNumber(product.price)}</span> টাকা
+            <span className="font-bold">{toBnNumber(product.price, 0, lang)}</span> {t("taka")}
           </p>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${badge.cls}`}>
-            {badge.sym} {toBnNumber(Math.abs(pct), 1)}%
+            {badge.sym} {toBnNumber(Math.abs(pct), 1, lang)}%
           </span>
         </div>
       </Link>

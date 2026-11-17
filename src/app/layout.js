@@ -14,10 +14,12 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const theme = (await cookies()).get("theme")?.value;
+  const store = await cookies();
+  const theme = store.get("theme")?.value;
+  const lang = store.get("lang")?.value === "en" ? "en" : "bn";
 
   return (
-    <html lang="bn" className={theme === "dark" ? "dark" : ""} suppressHydrationWarning>
+    <html lang={lang} className={theme === "dark" ? "dark" : ""} suppressHydrationWarning>
       <body className={font.className}>
         <Providers>{children}</Providers>
       </body>

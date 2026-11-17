@@ -7,10 +7,11 @@ import ProductSection from "@/components/ProductSection";
 import { getProducts } from "@/lib/products";
 import { getFavouriteIds } from "@/lib/favourites";
 import { getSession } from "@/lib/session";
+import { getT } from "@/lib/i18n";
 import { changePct, toBnNumber } from "@/lib/format";
 
 export default async function Home() {
-  const session = await getSession();
+  const [session, { lang, t }] = await Promise.all([getSession(), getT()]);
   const [products, favIds] = await Promise.all([
     getProducts(),
     session ? getFavouriteIds(session.user.id) : [],
@@ -33,11 +34,11 @@ export default async function Home() {
       <main className="max-w-6xl mx-auto px-4 py-6 pb-16">
         <Hero />
         <SearchBar />
-        <ProductSection title="আজ দাম বেড়েছে" icon="▲" iconColor="text-red-600" items={risers} favIds={favIds} />
-        <ProductSection title="আজ দাম কমেছে" icon="▼" iconColor="text-green-700" items={fallers} favIds={favIds} />
+        <ProductSection title={t("risers")} icon="▲" iconColor="text-red-600" items={risers} favIds={favIds} />
+        <ProductSection title={t("fallers")} icon="▼" iconColor="text-green-700" items={fallers} favIds={favIds} />
         <ProductSection
-          title="সব পণ্য"
-          subtitle={`মোট ${toBnNumber(products.length)}টি পণ্য দেখানো হচ্ছে`}
+          title={t("allProducts")}
+          subtitle={t("totalShown", { n: toBnNumber(products.length, 0, lang) })}
           items={products}
           favIds={favIds}
         />
