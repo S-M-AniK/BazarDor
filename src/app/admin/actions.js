@@ -3,12 +3,14 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/mongodb";
 import { getSession } from "@/lib/session";
+import { categories } from "@/data/products";
 
 const bnDigits = "০১২৩৪৫৬৭৮৯";
+const categoryIds = new Set(categories.map((c) => c.id));
 
 const toNumber = (value) =>
   Number(
-    String(value)
+    String(value ?? "")
       .replace(/[০-৯]/g, (d) => bnDigits.indexOf(d))
       .replace(/[^\d.]/g, "")
   );
@@ -69,44 +71,71 @@ export async function bulkUpdatePrices(formData) {
   const text = (await file.text()).replace(/^\uFEFF/, "");
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   const header = parseLine(lines[0] ?? "").map((h) => h.toLowerCase());
-  const idCol = header.indexOf("id");
-  const priceCol = header.indexOf("price");
+  const col = (name) => header.indexOf(name);
+  const idCol = col("id");
+  const priceCol = col("price");
+  const nameCol = col("name");
+  const unitCol = col("unit");
+  const categoryCol = col("category");
+  const iconCol = col("icon");
   if (idCol === -1 || priceCol === -1) redirect("/admin?csv=header");
 
   const products = await db.collection("products").find({}).toArray();
   const byId = new Map(products.map((p) => [p.id, p]));
+  const byName = new Map(products.map((p) => [p.name, p]));
+  let nextId = products.reduce((max, p) => Math.max(max, p.id), 0) + 1;
 
-  const ops = [];
+  const updates = [];
+  const inserts = [];
   const history = [];
   let skipped = 0;
   const now = new Date();
+  const yesterday = new Date(now.getTime() - 86400000);
 
   for (const line of lines.slice(1)) {
     const cells = parseLine(line);
-    const id = toNumber(cells[idCol]);
     const price = toNumber(cells[priceCol]);
-    const current = byId.get(id);
-
-    if (!current || !(price > 0)) {
+    if (!(price > 0)) {
       skipped += 1;
       continue;
     }
-    if (current.price === price) continue;
 
-    ops.push({
-      updateOne: {
-        filter: { id },
-        update: { $set: { prev: current.price, price, updatedAt: now } },
-      },
-    });
-    history.push({ productId: id, price, date: now });
+    const name = nameCol > -1 ? cells[nameCol] : "";
+    const existing = byId.get(toNumber(cells[idCol])) ?? (name ? byName.get(name) : undefined);
+
+    if (existing) {
+      if (existing.price === price) continue;
+      updates.push({
+        updateOne: {
+          filter: { id: existing.id },
+          update: { $set: { prev: existing.price, price, updatedAt: now } },
+        },
+      });
+      history.push({ productId: existing.id, price, date: now });
+      continue;
+    }
+
+    const unit = unitCol > -1 ? cells[unitCol] : "";
+    const category = categoryCol > -1 ? cells[categoryCol].toLowerCase() : "";
+    const icon = iconCol > -1 && cells[iconCol] ? cells[iconCol] : "🛒";
+    if (!name || !unit || !categoryIds.has(category)) {
+      skipped += 1;
+      continue;
+    }
+
+    const id = nextId++;
+    inserts.push({ id, name, icon, category, unit, price, prev: price, updatedAt: now });
+    byName.set(name, { id, name, price });
+    history.push(
+      { productId: id, price, date: yesterday },
+      { productId: id, price, date: now }
+    );
   }
 
-  if (ops.length > 0) {
-    await db.collection("products").bulkWrite(ops);
-    await db.collection("priceHistory").insertMany(history);
-    revalidatePath("/", "layout");
-  }
+  if (inserts.length > 0) await db.collection("products").insertMany(inserts);
+  if (updates.length > 0) await db.collection("products").bulkWrite(updates);
+  if (history.length > 0) await db.collection("priceHistory").insertMany(history);
+  if (inserts.length > 0 || updates.length > 0) revalidatePath("/", "layout");
 
-  redirect(`/admin?updated=${ops.length}&skipped=${skipped}`);
+  redirect(`/admin?updated=${updates.length + inserts.length}&skipped=${skipped}`);
 }

@@ -10,8 +10,10 @@ export async function GET() {
   const products = await getProducts();
   const quote = (v) => `"${String(v).replace(/"/g, '""')}"`;
   const rows = [
-    "id,name,unit,price",
-    ...products.map((p) => [p.id, quote(p.name), quote(p.unit), p.price].join(",")),
+    "id,name,unit,category,icon,price",
+    ...products.map((p) =>
+      [p.id, quote(p.name), quote(p.unit), p.category, quote(p.icon), p.price].join(",")
+    ),
   ];
 
   return new Response("\uFEFF" + rows.join("\r\n"), {
