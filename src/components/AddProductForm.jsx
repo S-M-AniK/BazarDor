@@ -26,7 +26,10 @@ export default function AddProductForm({ added, error }) {
         </p>
       )}
       <form action={addProduct} className="mt-5 space-y-4">
-        <input name="name" required placeholder="পণ্যের নাম (যেমন: লাউ)" className={field} />
+        <div className="grid grid-cols-2 gap-4">
+          <input name="name" required placeholder="পণ্যের নাম (যেমন: লাউ)" className={field} />
+          <input name="nameEn" placeholder="English name (e.g. Bottle Gourd)" className={field} />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <select name="category" required className={field}>
             {categories.map((c) => (

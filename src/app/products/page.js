@@ -5,15 +5,18 @@ import CategoryNav from "@/components/CategoryNav";
 import SearchBar from "@/components/SearchBar";
 import ProductSection from "@/components/ProductSection";
 import { categories } from "@/data/products";
+import { categoryName, productName } from "@/data/translations";
 import { getProducts } from "@/lib/products";
 import { getFavouriteIds } from "@/lib/favourites";
 import { toBnNumber } from "@/lib/format";
 import { getSession } from "@/lib/session";
+import { getT } from "@/lib/i18n";
 
 export default async function ProductsPage({ searchParams }) {
   const session = await getSession();
   if (!session) redirect("/login");
 
+  const { lang, t } = await getT();
   const { category, sort, q: rawQ } = await searchParams;
   const q = (rawQ ?? "").trim();
 
@@ -23,7 +26,14 @@ export default async function ProductsPage({ searchParams }) {
   ]);
 
   let items = category ? all.filter((p) => p.category === category) : [...all];
-  if (q) items = items.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()));
+  if (q) {
+    const needle = q.toLowerCase();
+    items = items.filter(
+      (p) =>
+        p.name.toLowerCase().includes(needle) ||
+        productName(p, "en").toLowerCase().includes(needle)
+    );
+  }
   if (sort === "asc") items.sort((a, b) => a.price - b.price);
   if (sort === "desc") items.sort((a, b) => b.price - a.price);
 
@@ -49,10 +59,10 @@ export default async function ProductsPage({ searchParams }) {
   );
 
   const heading = q
-    ? `"${q}" এর ফলাফল`
+    ? t("resultsFor", { q })
     : current
-    ? `${current.icon} ${current.name}`
-    : "সব পণ্য";
+    ? `${current.icon} ${categoryName(current, lang)}`
+    : t("allProducts");
 
   return (
     <>
@@ -63,24 +73,24 @@ export default async function ProductsPage({ searchParams }) {
         <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
           <h1 className="text-2xl font-bold">{heading}</h1>
           <div className="flex gap-2">
-            {sortLink("asc", "কম দাম আগে")}
-            {sortLink("desc", "বেশি দাম আগে")}
+            {sortLink("asc", t("sortAsc"))}
+            {sortLink("desc", t("sortDesc"))}
           </div>
         </div>
 
         {items.length === 0 ? (
           <div className="mt-6 bg-white border border-gray-200 rounded-3xl p-8 text-center">
-            <p className="text-gray-600">কোনো পণ্য পাওয়া যায়নি</p>
+            <p className="text-gray-600">{t("noProducts")}</p>
             <Link
               href="/products"
               className="inline-block mt-4 bg-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full"
             >
-              সব পণ্য দেখুন
+              {t("viewAll")}
             </Link>
           </div>
         ) : (
           <ProductSection
-            subtitle={`মোট ${toBnNumber(items.length)}টি পণ্য দেখানো হচ্ছে`}
+            subtitle={t("totalShown", { n: toBnNumber(items.length, 0, lang) })}
             items={items}
             favIds={favIds}
           />

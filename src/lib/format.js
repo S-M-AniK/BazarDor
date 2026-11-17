@@ -21,7 +21,7 @@ export const bnDate = (lang = "bn") =>
     year: "numeric",
   });
 
-const months = [
+const monthsBn = [
   "জানুয়ারি",
   "ফেব্রুয়ারি",
   "মার্চ",
@@ -36,7 +36,11 @@ const months = [
   "ডিসেম্বর",
 ];
 
-export const bnShortDate = (iso) => {
+const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export const bnShortDate = (iso, lang = "bn") => {
   const d = new Date(iso);
-  return `${toBnDigits(d.getUTCDate())} ${months[d.getUTCMonth()]}`;
+  const day = d.getUTCDate();
+  const month = d.getUTCMonth();
+  return lang === "en" ? `${day} ${monthsEn[month]}` : `${toBnDigits(day)} ${monthsBn[month]}`;
 };

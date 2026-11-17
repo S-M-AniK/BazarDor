@@ -2,10 +2,13 @@ import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import LogoutButton from "@/components/LogoutButton";
 import { getSession } from "@/lib/session";
+import { getT } from "@/lib/i18n";
 
 export default async function ProfilePage() {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  const { t } = await getT();
   const { user } = session;
 
   return (
@@ -18,7 +21,11 @@ export default async function ProfilePage() {
           </div>
           <h1 className="mt-4 text-2xl font-bold">{user.name}</h1>
           <p className="text-gray-500 text-sm mt-1">{user.email}</p>
-          <LogoutButton className="mt-6 bg-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full" />
+          <LogoutButton
+            label={t("signOut")}
+            message={t("signedOut")}
+            className="mt-6 bg-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full"
+          />
         </div>
       </main>
     </>

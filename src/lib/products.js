@@ -3,6 +3,7 @@ import { db } from "./mongodb";
 const clean = (d) => ({
   id: d.id,
   name: d.name,
+  nameEn: d.nameEn,
   icon: d.icon,
   category: d.category,
   unit: d.unit,

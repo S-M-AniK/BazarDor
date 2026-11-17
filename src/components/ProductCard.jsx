@@ -38,7 +38,12 @@ export default async function ProductCard({ product, favourite = false }) {
         </div>
       </Link>
       <div className="absolute top-3 right-3">
-        <FavouriteButton productId={product.id} initial={favourite} />
+        <FavouriteButton
+          productId={product.id}
+          initial={favourite}
+          addMsg={t("favAdded")}
+          removeMsg={t("favRemoved")}
+        />
       </div>
     </div>
   );

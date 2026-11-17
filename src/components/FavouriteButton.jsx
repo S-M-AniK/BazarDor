@@ -3,7 +3,7 @@ import { useState, useTransition } from "react";
 import toast from "react-hot-toast";
 import { toggleFavourite } from "@/app/actions";
 
-export default function FavouriteButton({ productId, initial }) {
+export default function FavouriteButton({ productId, initial, addMsg, removeMsg }) {
   const [active, setActive] = useState(initial);
   const [pending, startTransition] = useTransition();
 
@@ -11,7 +11,7 @@ export default function FavouriteButton({ productId, initial }) {
     startTransition(async () => {
       const res = await toggleFavourite(productId);
       setActive(res.active);
-      toast.success(res.active ? "পছন্দের তালিকায় যোগ হয়েছে" : "তালিকা থেকে সরানো হয়েছে");
+      toast.success(res.active ? addMsg : removeMsg);
     });
   };
 
@@ -20,7 +20,7 @@ export default function FavouriteButton({ productId, initial }) {
       type="button"
       onClick={onClick}
       disabled={pending}
-      aria-label="পছন্দের তালিকা"
+      aria-label="favourite"
       className={`w-9 h-9 rounded-full grid place-items-center text-lg border transition ${
         active
           ? "bg-red-50 border-red-200 text-red-500"

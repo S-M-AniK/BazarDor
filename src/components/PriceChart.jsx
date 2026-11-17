@@ -2,14 +2,13 @@
 import { useRef, useState } from "react";
 import { toBnNumber, bnShortDate } from "@/lib/format";
 
-const fmt = bnShortDate;
-
-export default function PriceChart({ data }) {
+export default function PriceChart({ data, lang = "bn", labels }) {
   const [hover, setHover] = useState(null);
   const box = useRef(null);
+  const fmt = (iso) => bnShortDate(iso, lang);
 
   if (data.length < 2) {
-    return <p className="mt-4 text-sm text-gray-500">এখনো যথেষ্ট তথ্য নেই</p>;
+    return <p className="mt-4 text-sm text-gray-500">{labels.noData}</p>;
   }
 
   const n = data.length;
@@ -52,7 +51,7 @@ export default function PriceChart({ data }) {
               className="absolute right-0 -translate-y-1/2 text-sm font-semibold text-gray-700"
               style={{ top: `${t.pos}%` }}
             >
-              {toBnNumber(t.value)}
+              {toBnNumber(t.value, 0, lang)}
             </span>
           ))}
         </div>
@@ -110,7 +109,9 @@ export default function PriceChart({ data }) {
                   style={{ left: `${tipLeft}%`, top: `calc(${y(point.price)}% - 14px)` }}
                 >
                   <p className="text-xs text-gray-300">{fmt(point.date)}</p>
-                  <p className="font-bold">{toBnNumber(point.price)} টাকা</p>
+                  <p className="font-bold">
+                    {toBnNumber(point.price, 0, lang)} {labels.taka}
+                  </p>
                 </div>
               </>
             )}
@@ -125,8 +126,8 @@ export default function PriceChart({ data }) {
       </div>
 
       <p className="mt-4 text-sm text-gray-600">
-        সর্বনিম্ন <span className="font-bold text-green-700">{toBnNumber(rawMin)}</span> টাকা ·
-        সর্বাধিক <span className="font-bold text-red-600">{toBnNumber(rawMax)}</span> টাকা
+        {labels.lowest} <span className="font-bold text-green-700">{toBnNumber(rawMin, 0, lang)}</span> {labels.taka} ·{" "}
+        {labels.highest} <span className="font-bold text-red-600">{toBnNumber(rawMax, 0, lang)}</span> {labels.taka}
       </p>
     </div>
   );

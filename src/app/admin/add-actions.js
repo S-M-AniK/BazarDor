@@ -12,6 +12,7 @@ export async function addProduct(formData) {
   if (!session || session.user.email !== process.env.ADMIN_EMAIL) redirect("/login");
 
   const name = String(formData.get("name") ?? "").trim();
+  const nameEn = String(formData.get("nameEn") ?? "").trim();
   const unit = String(formData.get("unit") ?? "").trim();
   const category = String(formData.get("category") ?? "");
   const icon = String(formData.get("icon") ?? "").trim() || "🛒";
@@ -29,7 +30,17 @@ export async function addProduct(formData) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 86400000);
 
-  await col.insertOne({ id, name, icon, category, unit, price, prev: price, updatedAt: now });
+  await col.insertOne({
+    id,
+    name,
+    ...(nameEn ? { nameEn } : {}),
+    icon,
+    category,
+    unit,
+    price,
+    prev: price,
+    updatedAt: now,
+  });
   await db.collection("priceHistory").insertMany([
     { productId: id, price, date: yesterday },
     { productId: id, price, date: now },

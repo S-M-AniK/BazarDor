@@ -52,7 +52,8 @@ const unitShortEn = {
   "১০০ গ্রাম": "100 g",
 };
 
-export const productName = (p, lang) => (lang === "en" && namesEn[p.id]) || p.name;
+export const productName = (p, lang) =>
+  lang === "en" ? p.nameEn || namesEn[p.id] || p.name : p.name;
 
 export const categoryName = (c, lang) => (lang === "en" && categoriesEn[c.id]) || c.name;
 
