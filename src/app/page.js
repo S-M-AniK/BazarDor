@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import CategoryNav from "@/components/CategoryNav";
 import Ticker from "@/components/Ticker";
 import Hero from "@/components/Hero";
+import SearchBar from "@/components/SearchBar";
 import ProductSection from "@/components/ProductSection";
 import { getProducts } from "@/lib/products";
 import { getFavouriteIds } from "@/lib/favourites";
@@ -31,6 +32,7 @@ export default async function Home() {
       <Ticker />
       <main className="max-w-6xl mx-auto px-4 py-6 pb-16">
         <Hero />
+        <SearchBar />
         <ProductSection title="আজ দাম বেড়েছে" icon="▲" iconColor="text-red-600" items={risers} favIds={favIds} />
         <ProductSection title="আজ দাম কমেছে" icon="▼" iconColor="text-green-700" items={fallers} favIds={favIds} />
         <ProductSection
