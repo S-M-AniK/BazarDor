@@ -1,13 +1,27 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { toggleFavourite } from "@/app/actions";
 
-export default function FavouriteButton({ productId, initial, addMsg, removeMsg }) {
+export default function FavouriteButton({
+  productId,
+  initial,
+  addMsg,
+  removeMsg,
+  loggedIn,
+  loginMsg,
+}) {
+  const router = useRouter();
   const [active, setActive] = useState(initial);
   const [pending, startTransition] = useTransition();
 
   const onClick = () => {
+    if (!loggedIn) {
+      toast(loginMsg);
+      router.push("/login");
+      return;
+    }
     startTransition(async () => {
       const res = await toggleFavourite(productId);
       setActive(res.active);

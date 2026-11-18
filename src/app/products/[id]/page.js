@@ -1,16 +1,14 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import PriceChart from "@/components/PriceChart";
 import { getProduct, getHistory } from "@/lib/products";
 import { marketPrices } from "@/lib/markets";
 import { changePct, toBnNumber } from "@/lib/format";
 import { productName, unitFull } from "@/data/translations";
-import { getSession } from "@/lib/session";
 import { getT } from "@/lib/i18n";
 
 export default async function ProductDetailPage({ params }) {
-  const session = await getSession();
   if (!session) redirect("/login");
 
   const { lang, t } = await getT();

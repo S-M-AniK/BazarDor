@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import CategoryNav from "@/components/CategoryNav";
 import SearchBar from "@/components/SearchBar";
@@ -14,7 +13,6 @@ import { getT } from "@/lib/i18n";
 
 export default async function ProductsPage({ searchParams }) {
   const session = await getSession();
-  if (!session) redirect("/login");
 
   const { lang, t } = await getT();
   const { category, sort, q: rawQ } = await searchParams;
@@ -22,7 +20,7 @@ export default async function ProductsPage({ searchParams }) {
 
   const [all, favIds] = await Promise.all([
     getProducts(),
-    getFavouriteIds(session.user.id),
+    session ? getFavouriteIds(session.user.id) : [],
   ]);
 
   let items = category ? all.filter((p) => p.category === category) : [...all];

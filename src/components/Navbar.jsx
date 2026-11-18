@@ -23,9 +23,9 @@ export default async function Navbar() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <LangToggle lang={lang} />
+          <Link href="/products" className="font-semibold text-sm">{t("products")}</Link>
           {user ? (
             <>
-              <Link href="/products" className="font-semibold text-sm">{t("products")}</Link>
               {user.email === process.env.ADMIN_EMAIL && (
                 <Link href="/admin" className="font-semibold text-sm text-brand">{t("priceUpdate")}</Link>
               )}

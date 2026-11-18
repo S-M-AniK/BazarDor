@@ -2,10 +2,11 @@ import Link from "next/link";
 import { changePct, toBnNumber } from "@/lib/format";
 import { productName, unitFull } from "@/data/translations";
 import { getT } from "@/lib/i18n";
+import { getSession } from "@/lib/session";
 import FavouriteButton from "./FavouriteButton";
 
 export default async function ProductCard({ product, favourite = false }) {
-  const { lang, t } = await getT();
+  const [{ lang, t }, session] = await Promise.all([getT(), getSession()]);
   const pct = changePct(product);
   const badge =
     pct > 0
@@ -43,6 +44,8 @@ export default async function ProductCard({ product, favourite = false }) {
           initial={favourite}
           addMsg={t("favAdded")}
           removeMsg={t("favRemoved")}
+          loggedIn={Boolean(session)}
+          loginMsg={t("signInToFav")}
         />
       </div>
     </div>
