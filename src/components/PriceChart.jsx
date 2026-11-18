@@ -29,7 +29,7 @@ export default function PriceChart({ data, lang = "bn", labels }) {
     pos: i * 25,
     value: Math.round(max - (range * i) / 4),
   }));
-  const labelIdx = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(f * (n - 1)));
+  const labelIdx = [...new Set([0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(f * (n - 1))))];
 
   const onMove = (e) => {
     const rect = box.current.getBoundingClientRect();
