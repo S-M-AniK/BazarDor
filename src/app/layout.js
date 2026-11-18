@@ -11,6 +11,12 @@ const font = Hind_Siliguri({
 export const metadata = {
   title: "বাজার দর – BazarDor",
   description: "প্রতিদিনের বাজারদর এক জায়গায়",
+  icons: { apple: "/pwa-icon/180" },
+  appleWebApp: { capable: true, title: "BazarDor", statusBarStyle: "default" },
+};
+
+export const viewport = {
+  themeColor: "#2563eb",
 };
 
 export default async function RootLayout({ children }) {
