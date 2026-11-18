@@ -1,69 +1,41 @@
-"use client";
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import { authClient } from "@/lib/auth-client";
+import LoginForm from "@/components/LoginForm";
 import SocialButtons from "@/components/SocialButtons";
+import LangToggle from "@/components/LangToggle";
+import { authText } from "@/data/authText";
+import { getLang } from "@/lib/i18n";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
-    setLoading(true);
-    const { error } = await authClient.signIn.email({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message || "সাইন ইন করা যায়নি");
-      return;
-    }
-    toast.success("স্বাগতম!");
-    router.push("/");
-    router.refresh();
-  };
+export default async function LoginPage() {
+  const lang = await getLang();
+  const a = authText[lang];
 
   return (
     <main className="min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-3xl p-8">
-        <Link href="/" className="flex items-center gap-3 mb-6">
-          <span className="w-10 h-10 rounded-xl bg-brand text-white grid place-items-center text-xl">🛒</span>
-          <span className="font-bold">বাজার দর</span>
-        </Link>
-        <h1 className="text-2xl font-bold">সাইন ইন করুন</h1>
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="ইমেইল"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand"
-          />
-          <input
-            name="password"
-            type="password"
-            required
-            placeholder="পাসওয়ার্ড"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand"
-          />
-          <button
-            disabled={loading}
-            className="w-full bg-brand text-white font-semibold rounded-xl py-2.5 text-sm disabled:opacity-60"
-          >
-            {loading ? "অপেক্ষা করুন..." : "সাইন ইন"}
-          </button>
-        </form>
-        <p className="my-5 text-center text-xs text-gray-400">অথবা</p>
-        <SocialButtons />
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/" className="flex items-center gap-3">
+            <span className="w-10 h-10 rounded-xl bg-brand text-white grid place-items-center text-xl">🛒</span>
+            <span className="font-bold">{a.siteName}</span>
+          </Link>
+          <LangToggle lang={lang} />
+        </div>
+        <h1 className="text-2xl font-bold">{a.loginTitle}</h1>
+        <LoginForm
+          lang={lang}
+          labels={{
+            email: a.email,
+            password: a.password,
+            submit: a.signIn,
+            wait: a.wait,
+            success: a.welcome,
+            fail: a.signInFail,
+          }}
+        />
+        <SocialButtons orText={a.or} failText={a.signInFail} />
         <p className="mt-6 text-sm text-center text-gray-600">
-          নতুন ব্যবহারকারী?{" "}
+          {a.newUser}{" "}
           <Link href="/register" className="text-brand font-semibold">
-            সাইন আপ
+            {a.signUp}
           </Link>
         </p>
       </div>

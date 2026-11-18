@@ -7,7 +7,7 @@ const providers = [
   { id: "github", label: "GitHub", enabled: process.env.NEXT_PUBLIC_GITHUB_ENABLED === "true" },
 ].filter((p) => p.enabled);
 
-export default function SocialButtons() {
+export default function SocialButtons({ orText = "অথবা", failText = "সাইন ইন করা যায়নি" }) {
   if (providers.length === 0) return null;
 
   const social = async (provider) => {
@@ -15,12 +15,12 @@ export default function SocialButtons() {
       provider,
       callbackURL: "/",
     });
-    if (error) toast.error(error.message || "সাইন ইন করা যায়নি");
+    if (error) toast.error(failText);
   };
 
   return (
     <>
-      <p className="my-5 text-center text-xs text-gray-400">অথবা</p>
+      <p className="my-5 text-center text-xs text-gray-400">{orText}</p>
       <div className="grid grid-cols-2 gap-3">
         {providers.map((p) => (
           <button
