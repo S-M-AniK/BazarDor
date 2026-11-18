@@ -13,7 +13,6 @@ import { getT } from "@/lib/i18n";
 
 export default async function ProductsPage({ searchParams }) {
   const session = await getSession();
-
   const { lang, t } = await getT();
   const { category, sort, q: rawQ } = await searchParams;
   const q = (rawQ ?? "").trim();

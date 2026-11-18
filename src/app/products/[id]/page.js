@@ -9,8 +9,6 @@ import { productName, unitFull } from "@/data/translations";
 import { getT } from "@/lib/i18n";
 
 export default async function ProductDetailPage({ params }) {
-  if (!session) redirect("/login");
-
   const { lang, t } = await getT();
   const { id } = await params;
   const product = await getProduct(id);
