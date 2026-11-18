@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { db } from "./mongodb";
 
 const clean = (d) => ({
@@ -11,10 +12,10 @@ const clean = (d) => ({
   prev: d.prev,
 });
 
-export async function getProducts() {
+export const getProducts = cache(async () => {
   const docs = await db.collection("products").find({}).sort({ id: 1 }).toArray();
   return docs.map(clean);
-}
+});
 
 export async function getProduct(id) {
   const doc = await db.collection("products").findOne({ id: Number(id) });
