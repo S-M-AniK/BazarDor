@@ -31,6 +31,7 @@ export default async function Navbar() {
               {user.email === process.env.ADMIN_EMAIL && (
                 <Link href="/admin" className="font-semibold text-sm text-brand">{t("priceUpdate")}</Link>
               )}
+              <Link href="/orders" className="font-semibold text-sm">📦 {t("myOrders")}</Link>
               <Link href="/favourites" className="font-semibold text-sm">♥ {t("favourites")}</Link>
               <Link href="/profile" className="font-semibold text-sm">{user.name}</Link>
               <LogoutButton

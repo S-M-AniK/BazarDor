@@ -9,6 +9,23 @@ export async function getOrder(id) {
   return { ...doc, id: doc._id.toString() };
 }
 
+export async function getUserOrders(userId) {
+  const docs = await db
+    .collection("orders")
+    .find({ userId })
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .toArray();
+  return docs.map((d) => ({
+    id: d._id.toString(),
+    orderNo: d.orderNo,
+    status: d.status,
+    total: d.total,
+    itemCount: d.items.length,
+    createdAt: d.createdAt,
+  }));
+}
+
 export function formatOrderTime(value, lang) {
   const local = new Date(new Date(value).getTime() + 6 * 3600000);
   const hh = String(local.getUTCHours()).padStart(2, "0");

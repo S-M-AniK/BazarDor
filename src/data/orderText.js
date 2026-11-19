@@ -50,6 +50,10 @@ export const orderText = {
     items: "পণ্য",
     deliverTo: "ডেলিভারির ঠিকানা",
     continueShopping: "আরও কেনাকাটা করুন",
+    myOrders: "আমার অর্ডার",
+    noOrders: "এখনো কোনো অর্ডার করা হয়নি",
+    itemsCount: "{n}টি পণ্য",
+    viewOrder: "বিস্তারিত",
   },
   en: {
     checkoutTitle: "Checkout",
@@ -102,5 +106,9 @@ export const orderText = {
     items: "Items",
     deliverTo: "Delivery address",
     continueShopping: "Continue shopping",
+    myOrders: "My orders",
+    noOrders: "You haven't placed any orders yet",
+    itemsCount: "{n} items",
+    viewOrder: "View",
   },
 };

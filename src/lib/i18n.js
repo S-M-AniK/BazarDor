@@ -60,6 +60,7 @@ export const messages = {
     signInToOrder: "অর্ডার করতে সাইন ইন করুন",
     stock: "স্টক",
     outOfStock: "স্টক শেষ",
+    myOrders: "আমার অর্ডার",
   },
   en: {
     products: "Products",
@@ -120,6 +121,7 @@ export const messages = {
     signInToOrder: "Sign in to place your order",
     stock: "Stock",
     outOfStock: "Out of stock",
+    myOrders: "My orders",
   },
 };
 
