@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import AddProductForm from "@/components/AddProductForm";
+import StockManager from "@/components/StockManager";
 import { getProducts } from "@/lib/products";
 import { getSession } from "@/lib/session";
 import { toBnNumber } from "@/lib/format";
 import { updatePrice, bulkUpdatePrices } from "./actions";
-import AddProductForm from "@/components/AddProductForm";
 
 const csvErrors = {
   file: "সঠিক CSV ফাইল দিন (সর্বোচ্চ ২০০ KB)",
@@ -16,7 +17,7 @@ export default async function AdminPage({ searchParams }) {
   if (!session) redirect("/login");
   if (session.user.email !== process.env.ADMIN_EMAIL) redirect("/");
 
-  const { ok, error, csv, updated, skipped, added, add } = await searchParams;
+  const { ok, error, csv, updated, skipped, added, add, stock } = await searchParams;
   const products = await getProducts();
 
   return (
@@ -62,6 +63,8 @@ export default async function AdminPage({ searchParams }) {
           </form>
         </div>
 
+        <StockManager products={products} status={stock} />
+
         <div className="bg-white border border-gray-200 rounded-3xl p-8">
           <h2 className="text-xl font-bold">📄 CSV দিয়ে সব দাম একসাথে</h2>
           <p className="mt-1 text-sm text-gray-500">
@@ -101,7 +104,8 @@ export default async function AdminPage({ searchParams }) {
             </button>
           </form>
         </div>
-                <AddProductForm added={added} error={add} />
+
+        <AddProductForm added={added} error={add} />
       </main>
     </>
   );

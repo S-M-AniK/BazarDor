@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { changePct, toBnNumber } from "@/lib/format";
-import { productName, unitFull } from "@/data/translations";
+import { productName, unitFull, unitShort } from "@/data/translations";
 import { getT } from "@/lib/i18n";
 import { getSession } from "@/lib/session";
 import FavouriteButton from "./FavouriteButton";
@@ -15,6 +15,11 @@ export default async function ProductCard({ product, favourite = false }) {
       : pct < 0
       ? { cls: "bg-green-50 text-green-700", sym: "▼" }
       : { cls: "bg-gray-100 text-gray-500", sym: "—" };
+
+  const known = typeof product.stock === "number";
+  const soldOut = known && product.stock <= 0;
+  const low = known && product.stock > 0 && product.stock <= 10;
+  const stockCls = soldOut ? "text-red-600" : low ? "text-orange-600" : "text-green-700";
 
   return (
     <div className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-brand hover:shadow-sm transition">
@@ -35,11 +40,19 @@ export default async function ProductCard({ product, favourite = false }) {
             {badge.sym} {toBnNumber(Math.abs(pct), 1, lang)}%
           </span>
         </div>
+        {known && (
+          <p className={`mt-2 text-xs font-medium ${stockCls}`}>
+            {soldOut
+              ? t("outOfStock")
+              : `${t("stock")}: ${toBnNumber(product.stock, product.stock % 1 ? 1 : 0, lang)} ${unitShort(product.unit, lang)}`}
+          </p>
+        )}
       </Link>
       <AddToCartButton
         productId={product.id}
-        label={`🛍️ ${t("addToCart")}`}
+        label={soldOut ? t("outOfStock") : `🛍️ ${t("addToCart")}`}
         addedMsg={t("addedToCart")}
+        disabled={soldOut}
         className="w-full border-t border-gray-200 py-2.5 text-sm font-semibold text-brand hover:bg-brand-soft"
       />
       <div className="absolute top-3 right-3">

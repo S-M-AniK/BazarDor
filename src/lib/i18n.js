@@ -58,6 +58,8 @@ export const messages = {
     cartTotal: "মোট",
     checkout: "অর্ডার করতে এগিয়ে যান",
     signInToOrder: "অর্ডার করতে সাইন ইন করুন",
+    stock: "স্টক",
+    outOfStock: "স্টক শেষ",
   },
   en: {
     products: "Products",
@@ -116,6 +118,8 @@ export const messages = {
     cartTotal: "Total",
     checkout: "Proceed to checkout",
     signInToOrder: "Sign in to place your order",
+    stock: "Stock",
+    outOfStock: "Out of stock",
   },
 };
 

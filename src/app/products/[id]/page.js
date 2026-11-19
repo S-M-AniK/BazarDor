@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import PriceChart from "@/components/PriceChart";
+import AddToCartButton from "@/components/AddToCartButton";
 import { getProduct, getHistory } from "@/lib/products";
 import { marketPrices } from "@/lib/markets";
 import { changePct, toBnNumber } from "@/lib/format";
-import { productName, unitFull } from "@/data/translations";
+import { productName, unitFull, unitShort } from "@/data/translations";
 import { getT } from "@/lib/i18n";
 
 export default async function ProductDetailPage({ params }) {
@@ -21,6 +22,11 @@ export default async function ProductDetailPage({ params }) {
   const max = Math.max(...prices);
   const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
   const pct = changePct(product);
+
+  const known = typeof product.stock === "number";
+  const soldOut = known && product.stock <= 0;
+  const low = known && product.stock > 0 && product.stock <= 10;
+  const stockCls = soldOut ? "text-red-600" : low ? "text-orange-600" : "text-green-700";
 
   const stats = [
     { label: t("lowest"), value: min, cls: "text-green-700" },
@@ -43,15 +49,29 @@ export default async function ProductDetailPage({ params }) {
           {t("backToAll")}
         </Link>
 
-        <div className="mt-4 bg-white border border-gray-200 rounded-3xl p-6 flex items-center gap-4">
+        <div className="mt-4 bg-white border border-gray-200 rounded-3xl p-6 flex items-center gap-4 flex-wrap">
           <span className="w-16 h-16 rounded-2xl bg-gray-50 grid place-items-center text-4xl">{product.icon}</span>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">{productName(product, lang)}</h1>
             <p className="text-sm text-gray-500">
               {unitFull(product.unit, lang)} · {t("todayPrice")} {toBnNumber(product.price, 0, lang)} {t("taka")} ·{" "}
               {pct > 0 ? "▲" : pct < 0 ? "▼" : "—"} {toBnNumber(Math.abs(pct), 1, lang)}%
             </p>
+            {known && (
+              <p className={`mt-1 text-sm font-semibold ${stockCls}`}>
+                {soldOut
+                  ? t("outOfStock")
+                  : `${t("stock")}: ${toBnNumber(product.stock, product.stock % 1 ? 1 : 0, lang)} ${unitShort(product.unit, lang)}`}
+              </p>
+            )}
           </div>
+          <AddToCartButton
+            productId={product.id}
+            label={soldOut ? t("outOfStock") : `🛍️ ${t("addToCart")}`}
+            addedMsg={t("addedToCart")}
+            disabled={soldOut}
+            className="bg-brand text-white font-semibold rounded-xl px-5 py-2.5 text-sm"
+          />
         </div>
 
         <div className="mt-6 grid grid-cols-3 gap-4">

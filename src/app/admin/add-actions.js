@@ -38,7 +38,7 @@ export async function addProduct(formData) {
     category,
     unit,
     price,
-    prev: price,
+    prev: price, stock: 100,
     updatedAt: now,
   });
   await db.collection("priceHistory").insertMany([

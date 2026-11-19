@@ -124,7 +124,7 @@ export async function bulkUpdatePrices(formData) {
     }
 
     const id = nextId++;
-    inserts.push({ id, name, icon, category, unit, price, prev: price, updatedAt: now });
+    inserts.push({ id, name, icon, category, unit, price, prev: price, stock: 100, updatedAt: now });
     byName.set(name, { id, name, price });
     history.push(
       { productId: id, price, date: yesterday },

@@ -10,6 +10,7 @@ const clean = (d) => ({
   unit: d.unit,
   price: d.price,
   prev: d.prev,
+  stock: d.stock,
 });
 
 export const getProducts = cache(async () => {
