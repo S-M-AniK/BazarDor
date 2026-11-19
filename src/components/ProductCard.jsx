@@ -4,6 +4,7 @@ import { productName, unitFull } from "@/data/translations";
 import { getT } from "@/lib/i18n";
 import { getSession } from "@/lib/session";
 import FavouriteButton from "./FavouriteButton";
+import AddToCartButton from "./AddToCartButton";
 
 export default async function ProductCard({ product, favourite = false }) {
   const [{ lang, t }, session] = await Promise.all([getT(), getSession()]);
@@ -16,11 +17,8 @@ export default async function ProductCard({ product, favourite = false }) {
       : { cls: "bg-gray-100 text-gray-500", sym: "—" };
 
   return (
-    <div className="relative">
-      <Link
-        href={`/products/${product.id}`}
-        className="block bg-white border border-gray-200 rounded-2xl p-4 hover:border-brand hover:shadow-sm transition"
-      >
+    <div className="relative bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-brand hover:shadow-sm transition">
+      <Link href={`/products/${product.id}`} className="block p-4">
         <div className="flex items-center gap-3 pr-10">
           <span className="w-11 h-11 rounded-xl bg-gray-50 grid place-items-center text-2xl">{product.icon}</span>
           <div className="leading-tight">
@@ -38,6 +36,12 @@ export default async function ProductCard({ product, favourite = false }) {
           </span>
         </div>
       </Link>
+      <AddToCartButton
+        productId={product.id}
+        label={`🛍️ ${t("addToCart")}`}
+        addedMsg={t("addedToCart")}
+        className="w-full border-t border-gray-200 py-2.5 text-sm font-semibold text-brand hover:bg-brand-soft"
+      />
       <div className="absolute top-3 right-3">
         <FavouriteButton
           productId={product.id}

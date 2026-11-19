@@ -1,97 +1,110 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import CategoryNav from "@/components/CategoryNav";
-import SearchBar from "@/components/SearchBar";
-import ProductSection from "@/components/ProductSection";
-import { categories } from "@/data/products";
-import { categoryName, productName } from "@/data/translations";
-import { getProducts } from "@/lib/products";
-import { getFavouriteIds } from "@/lib/favourites";
-import { toBnNumber } from "@/lib/format";
-import { getSession } from "@/lib/session";
+import PriceChart from "@/components/PriceChart";
+import AddToCartButton from "@/components/AddToCartButton";
+import { getProduct, getHistory } from "@/lib/products";
+import { marketPrices } from "@/lib/markets";
+import { changePct, toBnNumber } from "@/lib/format";
+import { productName, unitFull } from "@/data/translations";
 import { getT } from "@/lib/i18n";
 
-export default async function ProductsPage({ searchParams }) {
-  const session = await getSession();
+export default async function ProductDetailPage({ params }) {
   const { lang, t } = await getT();
-  const { category, sort, q: rawQ } = await searchParams;
-  const q = (rawQ ?? "").trim();
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product) notFound();
 
-  const [all, favIds] = await Promise.all([
-    getProducts(),
-    session ? getFavouriteIds(session.user.id) : [],
-  ]);
+  const history = await getHistory(id);
+  const rows = marketPrices(product);
+  const prices = rows.map((r) => r.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+  const pct = changePct(product);
 
-  let items = category ? all.filter((p) => p.category === category) : [...all];
-  if (q) {
-    const needle = q.toLowerCase();
-    items = items.filter(
-      (p) =>
-        p.name.toLowerCase().includes(needle) ||
-        productName(p, "en").toLowerCase().includes(needle)
-    );
-  }
-  if (sort === "asc") items.sort((a, b) => a.price - b.price);
-  if (sort === "desc") items.sort((a, b) => b.price - a.price);
+  const stats = [
+    { label: t("lowest"), value: min, cls: "text-green-700" },
+    { label: t("average"), value: avg, cls: "text-gray-900" },
+    { label: t("highest"), value: max, cls: "text-red-600" },
+  ];
 
-  const current = categories.find((c) => c.id === category);
-
-  const link = (overrides) => {
-    const sp = new URLSearchParams();
-    const next = { category, q, sort, ...overrides };
-    for (const [k, v] of Object.entries(next)) if (v) sp.set(k, v);
-    const s = sp.toString();
-    return s ? `/products?${s}` : "/products";
+  const chartLabels = {
+    noData: t("noData"),
+    lowest: t("lowest"),
+    highest: t("highest"),
+    taka: t("taka"),
   };
-
-  const sortLink = (key, label) => (
-    <Link
-      href={link({ sort: key })}
-      className={`px-4 py-1.5 rounded-full text-sm border ${
-        sort === key ? "bg-brand text-white border-brand" : "bg-white border-gray-200"
-      }`}
-    >
-      {label}
-    </Link>
-  );
-
-  const heading = q
-    ? t("resultsFor", { q })
-    : current
-    ? `${current.icon} ${categoryName(current, lang)}`
-    : t("allProducts");
 
   return (
     <>
       <Navbar />
-      <CategoryNav />
-      <main className="max-w-6xl mx-auto px-4 py-6 pb-16">
-        <SearchBar defaultValue={q} category={category} sort={sort} />
-        <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
-          <h1 className="text-2xl font-bold">{heading}</h1>
-          <div className="flex gap-2">
-            {sortLink("asc", t("sortAsc"))}
-            {sortLink("desc", t("sortDesc"))}
+      <main className="max-w-4xl mx-auto px-4 py-8 pb-16">
+        <Link href="/products" className="text-sm text-brand font-semibold">
+          {t("backToAll")}
+        </Link>
+
+        <div className="mt-4 bg-white border border-gray-200 rounded-3xl p-6 flex items-center gap-4 flex-wrap">
+          <span className="w-16 h-16 rounded-2xl bg-gray-50 grid place-items-center text-4xl">{product.icon}</span>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">{productName(product, lang)}</h1>
+            <p className="text-sm text-gray-500">
+              {unitFull(product.unit, lang)} · {t("todayPrice")} {toBnNumber(product.price, 0, lang)} {t("taka")} ·{" "}
+              {pct > 0 ? "▲" : pct < 0 ? "▼" : "—"} {toBnNumber(Math.abs(pct), 1, lang)}%
+            </p>
           </div>
+          <AddToCartButton
+            productId={product.id}
+            label={`🛍️ ${t("addToCart")}`}
+            addedMsg={t("addedToCart")}
+            className="bg-brand text-white font-semibold rounded-xl px-5 py-2.5 text-sm"
+          />
         </div>
 
-        {items.length === 0 ? (
-          <div className="mt-6 bg-white border border-gray-200 rounded-3xl p-8 text-center">
-            <p className="text-gray-600">{t("noProducts")}</p>
-            <Link
-              href="/products"
-              className="inline-block mt-4 bg-brand text-white text-sm font-semibold px-5 py-2.5 rounded-full"
-            >
-              {t("viewAll")}
-            </Link>
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-4">
+              <p className="text-sm text-gray-500">{s.label}</p>
+              <p className={`mt-1 text-xl font-bold ${s.cls}`}>
+                {toBnNumber(s.value, 0, lang)} {t("taka")}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <section className="mt-8 bg-white border border-gray-200 rounded-3xl p-6">
+          <h2 className="font-bold">{t("chartTitle")}</h2>
+          <PriceChart data={history} lang={lang} labels={chartLabels} />
+        </section>
+
+        <section className="mt-8 bg-white border border-gray-200 rounded-3xl p-6">
+          <h2 className="font-bold">{t("marketCompare")}</h2>
+          <div className="mt-4 space-y-4">
+            {rows.map((r) => (
+              <div key={r.name}>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium flex items-center gap-2">
+                    {lang === "en" ? r.nameEn : r.name}
+                    {r.price === min && (
+                      <span className="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full">
+                        {t("cheapest")}
+                      </span>
+                    )}
+                  </span>
+                  <span className="font-bold">
+                    {toBnNumber(r.price, 0, lang)} {t("taka")}
+                  </span>
+                </div>
+                <div className="mt-2 h-2 rounded-full bg-gray-100">
+                  <div
+                    className={`h-2 rounded-full ${r.price === min ? "bg-green-600" : "bg-brand"}`}
+                    style={{ width: `${(r.price / max) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-        ) : (
-          <ProductSection
-            subtitle={t("totalShown", { n: toBnNumber(items.length, 0, lang) })}
-            items={items}
-            favIds={favIds}
-          />
-        )}
+        </section>
       </main>
     </>
   );

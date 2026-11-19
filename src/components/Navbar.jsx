@@ -5,6 +5,7 @@ import { getT } from "@/lib/i18n";
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
 import LangToggle from "./LangToggle";
+import CartLink from "./CartLink";
 
 export default async function Navbar() {
   const [session, { lang, t }] = await Promise.all([getSession(), getT()]);
@@ -24,6 +25,7 @@ export default async function Navbar() {
           <ThemeToggle />
           <LangToggle lang={lang} />
           <Link href="/products" className="font-semibold text-sm">{t("products")}</Link>
+          <CartLink label={t("cart")} />
           {user ? (
             <>
               {user.email === process.env.ADMIN_EMAIL && (
