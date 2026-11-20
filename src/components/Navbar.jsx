@@ -29,7 +29,12 @@ export default async function Navbar() {
           {user ? (
             <>
               {user.email === process.env.ADMIN_EMAIL && (
-                <Link href="/admin" className="font-semibold text-sm text-brand">{t("priceUpdate")}</Link>
+                <>
+                  <Link href="/admin" className="font-semibold text-sm text-brand">{t("priceUpdate")}</Link>
+                  <Link href="/admin/orders" className="font-semibold text-sm text-brand">
+                    📋 {lang === "en" ? "Manage orders" : "অর্ডার ম্যানেজ"}
+                  </Link>
+                </>
               )}
               <Link href="/orders" className="font-semibold text-sm">📦 {t("myOrders")}</Link>
               <Link href="/favourites" className="font-semibold text-sm">♥ {t("favourites")}</Link>
