@@ -1,8 +1,8 @@
 # 🥬 BazarDor (বাজার দর)
 
-A Bangla-first grocery price tracker where daily prices, price changes and market comparisons live in one place. Prices are shown in Bangla numerals with familiar local units, so people can check market rates before leaving home. The whole site also works in English.
+A Bangla-first grocery price tracker and ordering app. Daily prices, price changes and market comparisons live in one place, shown in Bangla numerals with familiar local units. Shoppers can check rates, add items to a cart and place an order. The whole site also works in English and can be installed on a phone.
 
-**Live demo:** https://bazardor-bd-delta.vercel.app
+**Live demo:** [bazardor-bd-delta.vercel.app](https://bazardor-bd-delta.vercel.app)
 
 ## The problem
 
@@ -13,19 +13,28 @@ A Bangla-first grocery price tracker where daily prices, price changes and marke
 
 ## Features
 
+### For shoppers
+
 - **Daily Price Dashboard:** today's prices in Bangla numerals with local units (per kg, per litre, per dozen)
 - **Scrolling Price Ticker:** a moving strip of product prices and percentage changes
 - **Risers and Fallers:** items that got costlier or cheaper than yesterday
 - **Market Comparison:** compare prices across five Dhaka markets and spot the cheapest
-- **Price Summary:** lowest, highest and average price for every product
-- **Price History Chart:** 30-day line chart with a price scale and hover tooltips
-- **Category Browsing and Search:** eight grocery categories, sorting by price, and search in Bangla or English
+- **Price Summary and Chart:** lowest, highest and average price, plus a 30-day line chart with hover tooltips
+- **Category Browsing and Search:** eight grocery categories, price sorting, and search in Bangla or English
+- **Guest Browsing:** anyone can browse prices without signing in; sign-in is only needed to order or save favourites
 - **Favourites and Budget Calculator:** save products and calculate the total cost for the quantities you need
-- **Bangla / English Toggle:** the whole interface switches language and the choice is remembered
-- **Dark Mode:** theme choice is saved in a cookie
-- **Secure Authentication:** sign in with email, Google or GitHub
-- **Protected Routes:** product, favourites, profile and admin pages need a session
-- **Admin Dashboard:** update one price, upload a CSV to update every price at once, or add a brand new product. The dashboard, ticker, risers/fallers and charts update automatically
+- **Cart and Checkout:** add items to a cart, enter delivery details, and pay with Cash on Delivery or a simulated bKash payment
+- **My Orders:** every order gets a number, and its status (pending, confirmed, out for delivery, delivered, cancelled) can be followed on the My Orders page
+- **Stock Awareness:** stock levels are shown on every product, and sold-out items cannot be ordered
+- **Bangla / English Toggle and Dark Mode:** both choices are remembered
+- **PWA:** can be installed on a phone's home screen
+
+### For the admin
+
+- **Price Management:** update one price, or upload a CSV to update every price at once
+- **Add Products:** create new products with Bangla and English names, category, unit and emoji
+- **Stock Management:** add to stock or set it to an exact number
+- **Order Management:** see every order with customer details, move it through the delivery stages, or cancel it (cancelling returns the items to stock)
 
 ## Tech stack
 
@@ -60,11 +69,12 @@ NEXT_PUBLIC_GITHUB_ENABLED=false
 
 Generate a secret with `openssl rand -base64 32`. Google and GitHub login are optional: add the keys and set the matching `NEXT_PUBLIC_..._ENABLED` flag to `true` to show the buttons.
 
-Load the sample products and 30-day price history into MongoDB:
+Load the sample products, 30-day price history and starting stock into MongoDB:
 
 ```bash
 node --env-file=.env.local scripts/seed.mjs
 node --env-file=.env.local scripts/seed-history.mjs
+node --env-file=.env.local scripts/add-stock.mjs
 ```
 
 Start the development server:
@@ -73,27 +83,27 @@ Start the development server:
 npm run dev
 ```
 
-Open `http://localhost:3000`. Register an account with the same email as `ADMIN_EMAIL` to access the admin page.
+Open `http://localhost:3000`. Register an account with the same email as `ADMIN_EMAIL` to access the admin pages.
 
-## Admin
+## Ordering flow
 
-The admin page is only available to the account that matches `ADMIN_EMAIL`.
+1. Browse products and add items to the cart (no account needed)
+2. Open the cart and continue to checkout, which asks the shopper to sign in
+3. Enter name, phone and address, then choose Cash on Delivery or the demo bKash option
+4. The order is saved with a number, stock is reduced, and the shopper lands on the order page
+5. The admin confirms, ships and delivers the order from `/admin/orders`, and the shopper sees each change in My Orders
 
-- **Single update:** pick a product and enter the new price
-- **CSV update:** download the template, change the `price` column, and upload the file to update every price together
-- **Add a product:** enter the Bangla name, an optional English name, category, unit, emoji and price
-
-Every price change is stored in a history collection, which powers the 30-day chart.
+Stock is reduced with an atomic update, so two shoppers cannot buy the last item at the same time. The bKash option is a demo and never charges real money.
 
 ## Project structure
 
 ```text
 src/
   app/            pages, server actions and the auth API route
-  components/     navbar, ticker, product cards, chart, budget calculator, forms
-  lib/            database, auth, session, translations and formatting helpers
+  components/     navbar, ticker, product cards, chart, cart, checkout, forms
+  lib/            database, auth, session, cart, orders, translations and helpers
   data/           categories, translations and seed products
-scripts/          database seed scripts
+scripts/          database seed and stock scripts
 ```
 
 ## Deployment
@@ -102,7 +112,7 @@ The app is deployed on Vercel and uses a MongoDB Atlas cluster. Set `MONGODB_URI
 
 ## Data note
 
-Prices and the 30-day history are sample data for demonstration, and the market-wise prices are derived from each product's price. The admin tools show how real prices can be maintained. Importing the daily reports published by Bangladesh's Department of Agricultural Marketing or the Trading Corporation of Bangladesh is a planned improvement.
+Prices and the 30-day history are sample data for demonstration, and the market-wise prices are derived from each product's price. The admin tools show how real prices can be maintained. Importing the daily reports published by Bangladesh's Department of Agricultural Marketing or the Trading Corporation of Bangladesh is a planned improvement. Orders are for demonstration: no goods are delivered and no real payment is taken.
 
 ## Author
 
