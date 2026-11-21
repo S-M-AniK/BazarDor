@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import CancelOrderButton from "@/components/CancelOrderButton";
 import { getSession } from "@/lib/session";
 import { getLang } from "@/lib/i18n";
 import { getOrder, formatOrderTime } from "@/lib/orders";
@@ -27,7 +28,17 @@ export default async function OrderPage({ params, searchParams }) {
 
   const order = await getOrder(id);
   const isAdmin = session.user.email === process.env.ADMIN_EMAIL;
-  if (!order || (order.userId !== session.user.id && !isAdmin)) notFound();
+  const isOwner = order?.userId === session.user.id;
+  if (!order || (!isOwner && !isAdmin)) notFound();
+
+  const cancelLabels = {
+    hint: o.cancelHint,
+    button: o.cancelOrder,
+    wait: o.cancelWait,
+    confirm: o.cancelConfirm,
+    done: o.cancelDone,
+    fail: o.cancelFail,
+  };
 
   return (
     <>
@@ -91,6 +102,10 @@ export default async function OrderPage({ params, searchParams }) {
             {order.trxId && <p className="text-gray-500">{order.trxId}</p>}
           </div>
         </section>
+
+        {isOwner && order.status === "pending" && (
+          <CancelOrderButton orderId={order.id} labels={cancelLabels} />
+        )}
 
         <Link
           href="/products"
