@@ -29,6 +29,10 @@ export default async function CartPage() {
     taka: t("taka"),
     checkout: t("checkout"),
     signInToOrder: t("signInToOrder"),
+    subtotal: t("subtotal"),
+    delivery: t("deliveryCharge"),
+    free: t("freeDelivery"),
+    freeHint: t("freeHint"),
   };
 
   return (

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useCart, addToCart, setQty, removeFromCart, clearCart } from "@/lib/cart";
 import { toBnNumber } from "@/lib/format";
+import { deliveryFee, FREE_DELIVERY_OVER } from "@/lib/delivery";
 
 export default function CartView({ products, lang, labels, loggedIn }) {
   const cart = useCart();
@@ -9,7 +10,10 @@ export default function CartView({ products, lang, labels, loggedIn }) {
   const rows = Object.entries(cart)
     .map(([id, qty]) => ({ product: byId.get(Number(id)), qty }))
     .filter((r) => r.product && r.qty > 0);
-  const total = rows.reduce((sum, r) => sum + r.product.price * r.qty, 0);
+  const subtotal = rows.reduce((sum, r) => sum + r.product.price * r.qty, 0);
+  const fee = deliveryFee(subtotal);
+  const total = subtotal + fee;
+  const remaining = FREE_DELIVERY_OVER - subtotal;
 
   if (rows.length === 0) {
     return (
@@ -77,7 +81,27 @@ export default function CartView({ products, lang, labels, loggedIn }) {
         ))}
       </div>
 
-      <div className="mt-4 rounded-2xl bg-brand-soft px-5 py-4 flex items-center justify-between">
+      <div className="mt-4 space-y-2 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-gray-500">{labels.subtotal}</span>
+          <span>
+            {toBnNumber(subtotal, 0, lang)} {labels.taka}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-gray-500">{labels.delivery}</span>
+          <span className={fee === 0 ? "text-green-700 font-semibold" : ""}>
+            {fee === 0 ? labels.free : `${toBnNumber(fee, 0, lang)} ${labels.taka}`}
+          </span>
+        </div>
+        {fee > 0 && (
+          <p className="text-xs text-orange-600">
+            {labels.freeHint.replace("{n}", toBnNumber(remaining, 0, lang))}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-3 rounded-2xl bg-brand-soft px-5 py-4 flex items-center justify-between">
         <span className="font-semibold">{labels.total}</span>
         <span className="text-2xl font-bold text-brand">
           {toBnNumber(total, 0, lang)} {labels.taka}

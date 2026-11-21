@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useCart, clearCart } from "@/lib/cart";
 import { placeOrder } from "@/app/checkout/actions";
 import { toBnNumber } from "@/lib/format";
+import { deliveryFee } from "@/lib/delivery";
 
 const field =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand bg-white";
@@ -20,7 +21,9 @@ export default function CheckoutForm({ products, lang, labels, defaultName }) {
   const rows = Object.entries(cart)
     .map(([id, qty]) => ({ product: byId.get(Number(id)), qty }))
     .filter((r) => r.product && r.qty > 0);
-  const total = rows.reduce((sum, r) => sum + r.product.price * r.qty, 0);
+  const subtotal = rows.reduce((sum, r) => sum + r.product.price * r.qty, 0);
+  const fee = deliveryFee(subtotal);
+  const total = subtotal + fee;
 
   if (rows.length === 0) {
     return (
@@ -128,7 +131,23 @@ export default function CheckoutForm({ products, lang, labels, defaultName }) {
             </div>
           ))}
         </div>
-        <div className="mt-4 rounded-2xl bg-brand-soft px-4 py-3 flex items-center justify-between">
+
+        <div className="mt-3 space-y-2 text-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500">{labels.subtotal}</span>
+            <span>
+              {toBnNumber(subtotal, 0, lang)} {labels.taka}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500">{labels.deliveryCharge}</span>
+            <span className={fee === 0 ? "text-green-700 font-semibold" : ""}>
+              {fee === 0 ? labels.freeDelivery : `${toBnNumber(fee, 0, lang)} ${labels.taka}`}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-2xl bg-brand-soft px-4 py-3 flex items-center justify-between">
           <span className="font-semibold">{labels.total}</span>
           <span className="text-xl font-bold text-brand">
             {toBnNumber(total, 0, lang)} {labels.taka}

@@ -31,6 +31,10 @@ export default async function OrderPage({ params, searchParams }) {
   const isOwner = order?.userId === session.user.id;
   if (!order || (!isOwner && !isAdmin)) notFound();
 
+  const fee = order.deliveryFee ?? 0;
+  const subtotal = order.subtotal ?? order.total - fee;
+  const hasBreakdown = order.deliveryFee !== undefined;
+
   const cancelLabels = {
     hint: o.cancelHint,
     button: o.cancelOrder,
@@ -79,7 +83,24 @@ export default async function OrderPage({ params, searchParams }) {
             ))}
           </div>
 
-          <div className="mt-4 rounded-2xl bg-brand-soft px-5 py-4 flex items-center justify-between">
+          {hasBreakdown && (
+            <div className="mt-4 space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">{o.subtotal}</span>
+                <span>
+                  {toBnNumber(subtotal, 0, lang)} {o.taka}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500">{o.deliveryCharge}</span>
+                <span className={fee === 0 ? "text-green-700 font-semibold" : ""}>
+                  {fee === 0 ? o.freeDelivery : `${toBnNumber(fee, 0, lang)} ${o.taka}`}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3 rounded-2xl bg-brand-soft px-5 py-4 flex items-center justify-between">
             <span className="font-semibold">{o.total}</span>
             <span className="text-2xl font-bold text-brand">
               {toBnNumber(order.total, 0, lang)} {o.taka}

@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/mongodb";
 import { getSession } from "@/lib/session";
+import { deliveryFee } from "@/lib/delivery";
 
 const bnDigits = "০১২৩৪৫৬৭৮৯";
 
@@ -90,7 +91,9 @@ export async function placeOrder(input) {
   }
 
   const now = new Date();
-  const total = round(items.reduce((sum, i) => sum + i.lineTotal, 0));
+  const subtotal = round(items.reduce((sum, i) => sum + i.lineTotal, 0));
+  const fee = deliveryFee(subtotal);
+  const total = round(subtotal + fee);
   const orderNo = "BD" + Date.now().toString(36).toUpperCase().slice(-6);
 
   try {
@@ -103,6 +106,8 @@ export async function placeOrder(input) {
       address,
       note,
       items,
+      subtotal,
+      deliveryFee: fee,
       total,
       payment,
       paymentStatus: payment === "bkash" ? "paid" : "unpaid",
