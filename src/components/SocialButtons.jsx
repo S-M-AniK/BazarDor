@@ -7,13 +7,17 @@ const providers = [
   { id: "github", label: "GitHub", enabled: process.env.NEXT_PUBLIC_GITHUB_ENABLED === "true" },
 ].filter((p) => p.enabled);
 
-export default function SocialButtons({ orText = "অথবা", failText = "সাইন ইন করা যায়নি" }) {
+export default function SocialButtons({
+  orText = "অথবা",
+  failText = "সাইন ইন করা যায়নি",
+  next = "/",
+}) {
   if (providers.length === 0) return null;
 
   const social = async (provider) => {
     const { error } = await authClient.signIn.social({
       provider,
-      callbackURL: "/",
+      callbackURL: next,
     });
     if (error) toast.error(failText);
   };

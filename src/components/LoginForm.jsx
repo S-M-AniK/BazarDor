@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth-client";
 const input =
   "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-brand";
 
-export default function LoginForm({ lang, labels }) {
+export default function LoginForm({ lang, labels, next = "/" }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +25,7 @@ export default function LoginForm({ lang, labels }) {
       return;
     }
     toast.success(labels.success);
-    router.push("/");
+    router.push(next);
     router.refresh();
   };
 

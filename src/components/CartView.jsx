@@ -93,7 +93,7 @@ export default function CartView({ products, lang, labels, loggedIn }) {
         </Link>
       ) : (
         <Link
-          href="/login"
+          href="/login?next=/checkout"
           className="mt-4 block text-center w-full bg-brand text-white font-semibold rounded-xl py-2.5 text-sm"
         >
           {labels.signInToOrder}

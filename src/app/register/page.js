@@ -4,10 +4,14 @@ import SocialButtons from "@/components/SocialButtons";
 import LangToggle from "@/components/LangToggle";
 import { authText } from "@/data/authText";
 import { getLang } from "@/lib/i18n";
+import { safeNext } from "@/lib/redirect";
 
-export default async function RegisterPage() {
+export default async function RegisterPage({ searchParams }) {
   const lang = await getLang();
   const a = authText[lang];
+  const { next: rawNext } = await searchParams;
+  const next = safeNext(rawNext);
+  const loginHref = next === "/" ? "/login" : `/login?next=${encodeURIComponent(next)}`;
 
   return (
     <main className="min-h-screen grid place-items-center px-4">
@@ -22,6 +26,7 @@ export default async function RegisterPage() {
         <h1 className="text-2xl font-bold">{a.registerTitle}</h1>
         <RegisterForm
           lang={lang}
+          next={next}
           labels={{
             name: a.name,
             email: a.email,
@@ -32,10 +37,10 @@ export default async function RegisterPage() {
             fail: a.signUpFail,
           }}
         />
-        <SocialButtons orText={a.or} failText={a.signUpFail} />
+        <SocialButtons orText={a.or} failText={a.signUpFail} next={next} />
         <p className="mt-6 text-sm text-center text-gray-600">
           {a.haveAccount}{" "}
-          <Link href="/login" className="text-brand font-semibold">
+          <Link href={loginHref} className="text-brand font-semibold">
             {a.signIn}
           </Link>
         </p>

@@ -19,7 +19,8 @@ export default function FavouriteButton({
   const onClick = () => {
     if (!loggedIn) {
       toast(loginMsg);
-      router.push("/login");
+      const here = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(here)}`);
       return;
     }
     startTransition(async () => {

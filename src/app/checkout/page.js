@@ -9,7 +9,7 @@ import { productName, unitShort } from "@/data/translations";
 
 export default async function CheckoutPage() {
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/login?next=/checkout");
 
   const [lang, all] = await Promise.all([getLang(), getProducts()]);
   const o = orderText[lang];
