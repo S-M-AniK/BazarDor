@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/mongodb";
 import { getSession } from "@/lib/session";
 import { categories } from "@/data/products";
+import { createPriceAlerts } from "@/lib/alerts";
 
 const bnDigits = "০১২৩৪৫৬৭৮৯";
 const categoryIds = new Set(categories.map((c) => c.id));
@@ -55,6 +56,7 @@ export async function updatePrice(formData) {
     price,
     date: new Date(),
   });
+  await createPriceAlerts([{ productId: id, oldPrice: current.price, newPrice: price }]);
 
   revalidatePath("/", "layout");
   redirect("/admin?ok=1");
@@ -88,6 +90,7 @@ export async function bulkUpdatePrices(formData) {
   const updates = [];
   const inserts = [];
   const history = [];
+  const changes = [];
   let skipped = 0;
   const now = new Date();
   const yesterday = new Date(now.getTime() - 86400000);
@@ -112,6 +115,7 @@ export async function bulkUpdatePrices(formData) {
         },
       });
       history.push({ productId: existing.id, price, date: now });
+      changes.push({ productId: existing.id, oldPrice: existing.price, newPrice: price });
       continue;
     }
 
@@ -135,6 +139,7 @@ export async function bulkUpdatePrices(formData) {
   if (inserts.length > 0) await db.collection("products").insertMany(inserts);
   if (updates.length > 0) await db.collection("products").bulkWrite(updates);
   if (history.length > 0) await db.collection("priceHistory").insertMany(history);
+  if (changes.length > 0) await createPriceAlerts(changes);
   if (inserts.length > 0 || updates.length > 0) revalidatePath("/", "layout");
 
   redirect(`/admin?updated=${updates.length + inserts.length}&skipped=${skipped}`);

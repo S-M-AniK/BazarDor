@@ -2,6 +2,7 @@ import Link from "next/link";
 import { bnDate } from "@/lib/format";
 import { getSession } from "@/lib/session";
 import { getT } from "@/lib/i18n";
+import { getUnreadCount } from "@/lib/alerts";
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
 import LangToggle from "./LangToggle";
@@ -10,6 +11,7 @@ import CartLink from "./CartLink";
 export default async function Navbar() {
   const [session, { lang, t }] = await Promise.all([getSession(), getT()]);
   const user = session?.user;
+  const unread = user ? await getUnreadCount(user.id) : 0;
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -28,6 +30,14 @@ export default async function Navbar() {
           <CartLink label={t("cart")} />
           {user ? (
             <>
+              <Link href="/alerts" aria-label="alerts" className="relative font-semibold text-sm">
+                🔔
+                {unread > 0 && (
+                  <span className="absolute -top-2 -right-3 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs grid place-items-center">
+                    {unread > 9 ? "9+" : unread}
+                  </span>
+                )}
+              </Link>
               {user.email === process.env.ADMIN_EMAIL && (
                 <>
                   <Link href="/admin" className="font-semibold text-sm text-brand">{t("priceUpdate")}</Link>

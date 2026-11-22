@@ -130,4 +130,3 @@ export const orderText = {
     cancelFail: "Could not cancel the order",
   },
 };
-

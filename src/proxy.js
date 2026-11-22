@@ -18,5 +18,6 @@ export const config = {
     "/favourites/:path*",
     "/checkout/:path*",
     "/orders/:path*",
+    "/alerts/:path*",
   ],
 };
